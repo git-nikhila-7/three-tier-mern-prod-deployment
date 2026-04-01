@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: bookstore_backend_img:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MONGODB_URL
+              value: "mongodb://mongodb-service:27017/bookstore"
+            - name: PORT
+              value: "8000"
+          ports:
+            - containerPort: 8000

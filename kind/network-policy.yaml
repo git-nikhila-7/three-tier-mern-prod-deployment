@@ -1,0 +1,115 @@
+---
+# Allow frontend to communicate with backend
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-to-backend
+  namespace: default
+spec:
+  selector: app == 'frontend'
+  types:
+    - Egress
+  egress:
+    - action: Allow
+      destination:
+        selector: app == 'backend'
+      ports:
+        - protocol: TCP
+          port: 8000
+
+---
+# Allow backend to communicate with MongoDB
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-to-mongodb
+  namespace: default
+spec:
+  selector: app == 'backend'
+  types:
+    - Egress
+  egress:
+    - action: Allow
+      destination:
+        selector: app == 'mongodb'
+      ports:
+        - protocol: TCP
+          port: 27017
+
+---
+# Allow MongoDB to receive traffic from backend
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: mongodb-ingress
+  namespace: default
+spec:
+  selector: app == 'mongodb'
+  types:
+    - Ingress
+  ingress:
+    - action: Allow
+      source:
+        selector: app == 'backend'
+      ports:
+        - protocol: TCP
+          port: 27017
+
+---
+# Allow backend to receive traffic from frontend
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-ingress
+  namespace: default
+spec:
+  selector: app == 'backend'
+  types:
+    - Ingress
+  ingress:
+    - action: Allow
+      source:
+        selector: app == 'frontend'
+      ports:
+        - protocol: TCP
+          port: 8000
+
+---
+# Allow frontend to receive external traffic (from LoadBalancer)
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-ingress
+  namespace: default
+spec:
+  selector: app == 'frontend'
+  types:
+    - Ingress
+  ingress:
+    - action: Allow
+      source:
+        namespaceSelector: ''  # Allow from all namespaces (including LoadBalancer)
+      ports:
+        - protocol: TCP
+          port: 3000
+
+---
+# Allow all pods to access DNS (CoreDNS)
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: default
+spec:
+  selector: all()
+  types:
+    - Egress
+  egress:
+    - action: Allow
+      destination:
+        namespaceSelector: ''
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
