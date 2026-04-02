@@ -4,8 +4,7 @@ metadata:
   name: mongodb-service
 spec:
   selector:
-    matchLabels:
-      app: mongodb
+    app: mongodb
   clusterIP: None
   ports:
     - port: 27017
@@ -16,13 +15,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-service
+  name: backend
 spec:
   selector:
-    matchLabels:
-      app: backend
+    app: backend
   ports:
-      port: 8000
+    - port: 8000
       targetPort: 8000
 
 ---
@@ -32,12 +30,11 @@ kind: Service
 metadata:
   name: frontend-service
 spec:
-  selector: 
-    matchLabels:
-      app: frontend 
+  selector:
+    app: frontend
   type: LoadBalancer
   ports:
-      port: 80
+    - port: 80
       targetPort: 3000
   
     
